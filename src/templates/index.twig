@@ -1,0 +1,40 @@
+<hr>
+
+<h2>{{ 'Warm URL Caches'|t('app') }}</h2>
+
+<form id="warm-cache-form" method="post" action="{{ url('actions/cache-cow/cache/warm') }}"
+>
+    {{ csrfInput() }}
+    <button type="submit" class="btn submit{% if jobsInProgress > 0 or not sitemapExists %} disabled{% endif %}" >
+        Warm Cache
+    </button>
+</form>
+{% if not sitemapExists %}
+    <div id="sitemap-missing-error">
+        Cache warming not possible - no sitemap.xml file found!
+    </div>
+{% endif %}
+{% if jobsInProgress > 0 %}
+    <div id="warm-cache-status">
+        {{ "Cache warming in progress. " ~ jobsInProgress ~ " URLs remaining. Check Queue Manager for details." }}
+    </div>
+{% endif %}
+
+<style>
+    #sitemap-missing-error {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    #warm-cache-status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8f5d7;
+        color: #5b5c16;
+        border: 1px solid #f5f5c6;
+    }
+</style>
