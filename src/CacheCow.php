@@ -38,6 +38,12 @@ class CacheCow extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        $config = Craft::$app->config->getConfigFromFile('cache-cow');
+        $this->settings = array_merge(
+            require dirname(__DIR__) . '/config.php',
+            $config
+        );
+
         $this->setComponents([
             'cacheCow' => CacheWarmerService::class,
         ]);

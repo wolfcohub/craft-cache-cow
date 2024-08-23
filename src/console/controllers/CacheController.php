@@ -3,9 +3,17 @@
 namespace wolfco\cachecow\console\controllers;
 
 use Craft;
-use yii\console\Controller;
+use craft\errors\SiteNotFoundException;
+use craft\helpers\UrlHelper;
+use vipnytt\SitemapParser;
+use vipnytt\SitemapParser\Exceptions\SitemapParserException;
+use wolfco\cachecow\CacheCow;
+use yii\base\Event;
+use craft\console\Controller;
 use wolfco\cachecow\services\CacheWarmerService;
+use yii\base\Exception;
 use yii\console\ExitCode;
+use yii\helpers\BaseConsole;
 
 class CacheController extends Controller
 {
@@ -22,24 +30,33 @@ class CacheController extends Controller
      */
     public function actionWarm(): int
     {
-        $sitemapExists = CacheWarmerService::instance()->getSitemapExists();
+        $service = CacheCow::$plugin->cacheCow;
+        $sitemapExists = $service->getSitemapExists();
         if (!$sitemapExists) {
-            $this->stderr("Error: Cache warming not possible - no sitemap.xml file found!\n");
+            $this->stderr("Error: Cache warming not possible - no sitemap.xml file found!" . PHP_EOL, BaseConsole::FG_RED);
             return ExitCode::UNSPECIFIED_ERROR;
         }
-        $jobsInProgress = CacheWarmerService::instance()->getCacheWarmJobsInProgress();
+        $jobsInProgress = $service->getCacheWarmJobsInProgress();
         if ($jobsInProgress > 0) {
-            $this->stderr("Error: Cache warming already in progress - " . $jobsInProgress . " jobs remaining\n");
+            $this->stderr("Error: Cache warming already in progress - " . $jobsInProgress . " jobs remaining" . PHP_EOL, BaseConsole::FG_RED);
             return ExitCode::UNSPECIFIED_ERROR;
         }
+
         try {
-            CacheWarmerService::instance()->warmCache();
-            $this->stdout("Cache warming started successfully!\n");
+            $urls = $service->getSiteUrls();
+            Event::on(CacheWarmerService::class, CacheWarmerService::EVENT_URL_FETCH_SUCCESS, function ($event) {
+                $this->stdout($event->message . PHP_EOL, BaseConsole::FG_GREEN);
+            });
+            Event::on(CacheWarmerService::class, CacheWarmerService::EVENT_URL_FETCH_FAILURE, function ($event) {
+                $this->stderr($event->message . PHP_EOL, BaseConsole::FG_RED);
+            });
+            $service->warmCache($urls)->wait();
+            $this->stdout("Cache warming completed successfully!" . PHP_EOL, BaseConsole::FG_GREEN);
             return ExitCode::OK;
 
         } catch (\Exception $e) {
             Craft::error($e->getMessage(), __METHOD__);
-            $this->stderr("Error: " . $e->getMessage() . "\n");
+            $this->stderr("Error: " . $e->getMessage() . PHP_EOL, BaseConsole::FG_RED);
             return ExitCode::UNSPECIFIED_ERROR;
         }
     }
