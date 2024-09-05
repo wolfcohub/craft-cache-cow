@@ -11,4 +11,10 @@ use craft\base\Model;
 class Settings extends Model
 {
     public $sitemapUrl = 'sitemap.xml';
+    public function rules(): array
+    {
+        return [
+            [['sitemapUrl'], 'string'],
+        ];
+    }
 }

@@ -2,14 +2,13 @@
 
 namespace wolfco\cachecow\services;
 
+use Craft;
 use craft\base\Component;
 use craft\errors\SiteNotFoundException;
 use craft\helpers\UrlHelper;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Pool;
-use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 use GuzzleRetry\GuzzleRetryMiddleware;
 use vipnytt\SitemapParser;
@@ -27,61 +26,58 @@ class CacheWarmerService extends Component
 
     /**
      * @param array $urls
-     * @return PromiseInterface
+     * @return void
      * @throws Exception
      */
-    public function warmCache(array $urls): PromiseInterface
+    public function warmCache(array $urls): void
     {
         if (!count($urls)) {
             throw new Exception('Cache warm failed because there are no URLs to cache');
         }
-
         // Add middleware to handle flood control
         $stack = HandlerStack::create();
         $stack->push(GuzzleRetryMiddleware::factory());
         $client = new Client(['handler' => $stack]);
-        $_this = $this;
 
-        // generate iterable batch of requests
-        $requests = function () use ($client, $urls, $_this) {
-            foreach ($urls as $url) {
-                yield function() use ($url, $client, $_this) {
-                    return $client->getAsync($url)->then(
-                        function (Response $response) use ($url, $_this) {
-                            $_this->trigger(self::EVENT_URL_FETCH_SUCCESS, new UrlFetchEvent([
-                                'message' => \Craft::t('app', 'Fetched {url} : {code}', ["url" => $url, "code" => $response->getStatusCode()]),
-                                'code' => $response->getStatusCode(),
-                                'url' => $url
-                            ]));
-                            return $response;
-                        },
-                        function (RequestException $reason) use ($url, $_this) {
-                            $_this->trigger(self::EVENT_URL_FETCH_FAILURE, new UrlFetchEvent([
-                                'message' => \Craft::t('app', 'Error fetching {url} : {code}', ['url' => $url, 'code' => $reason->getResponse()->getStatusCode()]),
-                                'code' => $reason->getResponse()->getStatusCode(),
-                                'url' => $url
-                            ]));
-                            return $reason;
-                        }
-                    );
-                };
+        foreach ($urls as $url) {
+            try {
+                $response = $client->get($url);
+                $successCode = $response->getStatusCode();
+                $successMessage = Craft::t('app', 'Fetched {url} : {code}', ["url" => $url, "code" => $successCode]);
+                Craft::info($successMessage, 'cache-cow');
+                $this->trigger(self::EVENT_URL_FETCH_SUCCESS, new UrlFetchEvent([
+                    'message' => $successMessage,
+                    'code' => $successCode,
+                    'url' => $url
+                ]));
+            } catch (RequestException $reason) {
+                $errorCode = $reason->getResponse()->getStatusCode();
+                $errorMessage = Craft::t('app', 'Error fetching {url} : {code}', ['url' => $url, 'code' => $errorCode]);
+                Craft::info($errorMessage, 'cache-cow');
+                $this->trigger(self::EVENT_URL_FETCH_FAILURE, new UrlFetchEvent([
+                    'message' => $errorMessage,
+                    'code' => $reason->getResponse()->getStatusCode(),
+                    'url' => $url
+                ]));
+            } catch (GuzzleException $e) {
+                $errorMessage = Craft::t('app', 'Error fetching {url} : {message}', ['url' => $url, 'message' => $e->getMessage()]);
+                Craft::info($errorMessage, 'cache-cow');
+                $this->trigger(self::EVENT_URL_FETCH_FAILURE, new UrlFetchEvent([
+                    'message' => $errorMessage,
+                    'code' => 0,
+                    'url' => $url
+                ]));
             }
-        };
-
-        // utilize multiple threads if available
-        $pool = new Pool($client, $requests(), [
-            'concurrency' => 5
-        ]);
-        return $pool->promise();
+        }
     }
 
     public function getSitemapExists(): bool
     {
-        $sitemapPath = \Craft::getAlias('@webroot/' . CacheCow::$plugin->getSettings()->sitemapUrl);
+        $sitemapPath = Craft::getAlias('@webroot/' . CacheCow::$plugin->getSettings()->sitemapUrl);
         return file_exists($sitemapPath);
     }
 
-    public function getCacheWarmJobsInProgress(): int
+    public static function getCacheWarmJobsInProgress(): int
     {
         // Query DB for jobs of type WarmUrlJob
         $jobs = (new \yii\db\Query())
@@ -97,7 +93,7 @@ class CacheWarmerService extends Component
      * @return array
      * @throws Exception
      */
-    public function getSiteUrls(): array
+    public static function getSiteUrls(): array
     {
         $parser = new SitemapParser();
         try {

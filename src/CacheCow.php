@@ -12,6 +12,7 @@ use craft\web\UrlManager;
 use craft\web\View;
 use wolfco\cachecow\services\CacheWarmerService;
 use yii\base\Event;
+use yii\log\FileTarget;
 
 /**
  * Cache Cow plugin
@@ -38,11 +39,12 @@ class CacheCow extends Plugin
         parent::init();
         self::$plugin = $this;
 
-        $config = Craft::$app->config->getConfigFromFile('cache-cow');
-        $this->settings = array_merge(
+        $pluginsService = Craft::$app->getPlugins();
+
+        $this->setSettings(array_merge(
+            $this->getSettings()->toArray(),
             require dirname(__DIR__) . '/config.php',
-            $config
-        );
+        ));
 
         $this->setComponents([
             'cacheCow' => CacheWarmerService::class,
@@ -60,9 +62,10 @@ class CacheCow extends Plugin
             View::class,
             View::EVENT_AFTER_RENDER_TEMPLATE,
             function (TemplateEvent $event) {
+                $jobsInProgress = CacheWarmerService::instance()->getCacheWarmJobsInProgress();
                 if ($event->template === '_components/utilities/ClearCaches.twig') {
+                    // Custom template to append to the Utilities -> Caches UI
                     $sitemapExists = CacheWarmerService::instance()->getSitemapExists();
-                    $jobsInProgress = CacheWarmerService::instance()->getCacheWarmJobsInProgress();
                     $event->output .= Craft::$app->view->renderTemplate('cache-cow/index', [
                         'jobsInProgress' => $jobsInProgress,
                         'sitemapExists' => $sitemapExists,
@@ -70,6 +73,12 @@ class CacheCow extends Plugin
                 }
             }
         );
+        Craft::getLogger()->dispatcher->targets['cacheCow'] = new FileTarget([
+            'logFile' => Craft::getAlias('@storage/logs/cache-cow-' . date('Y-m-d') . '.log'),
+            'categories' => ['cache-cow'],
+            'levels' => ['error', 'warning', 'info'],
+            'logVars' => [],
+        ]);
     }
 
     protected function createSettingsModel(): ?Model

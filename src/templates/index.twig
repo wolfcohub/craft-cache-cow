@@ -1,6 +1,6 @@
 <hr>
 
-<h2>{{ 'Warm URL Caches'|t('app') }}</h2>
+<h2>{{ 'Warm Sitemap Caches'|t('app') }}</h2>
 
 <form id="warm-cache-form" method="post" action="{{ url('actions/cache-cow/cache/warm') }}"
 >
@@ -19,6 +19,7 @@
         {{ "Cache warming in progress. " ~ jobsInProgress ~ " URLs remaining. Check Queue Manager for details." }}
     </div>
 {% endif %}
+<p>Powered by <a href="https://github.com/wolfcohub/craft-cache-cow">Cache Cow</a></p>
 
 <style>
     #sitemap-missing-error {
