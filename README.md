@@ -5,7 +5,7 @@ This plugin adds a "Warm Cache" button to Utilities > Caches on your Craft CMS c
 
 Or run the command
 ```bash
-./craft cache-cow/cache/warm
+/path/to/my/craft cache-cow/cache/warm
 ```
 
 If no sitemap.xml file exists in your web root, button will be disabled and you'll see an error.
@@ -35,7 +35,7 @@ cd /path/to/my-project.test
 composer require wolfco/craft-cache-cow
 
 # tell Craft to install the plugin
-./craft plugin/install cache-cow
+/path/to/my/craft plugin/install cache-cow
 ```
 
 ## Run on a schedule using Cron Job (Linux/macOS)
@@ -55,7 +55,7 @@ crontab -e
 
 Add the following line to the crontab file to run the cache warming command. For example, to run the command every hour:
 ```bash
-0 * * * * /path/to/your/craft/installation/craft cache-cow/cache/warm >/dev/null 2>&1
+0 * * * * /path/to/my/craft cache-cow/cache/warm >/dev/null 2>&1
 ```
 - Replace /path/to/your/craft/installation/ with the actual path to your Craft CMS project.
 - The >/dev/null 2>&1 ensures no output is logged unless there's an error.
@@ -63,7 +63,7 @@ Add the following line to the crontab file to run the cache warming command. For
 **Example Cron Job for Daily Execution at Midnight**
 To run the cache warming daily at midnight, use this cron job:
 ```bash
-0 0 * * * /path/to/your/craft/installation/craft cache-cow/cache/warm >/dev/null 2>&1
+0 0 * * * /path/to/my/craft cache-cow/cache/warm >/dev/null 2>&1
 ```
 
 > [!NOTE]  
