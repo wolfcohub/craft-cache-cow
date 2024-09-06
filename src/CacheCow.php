@@ -44,6 +44,7 @@ class CacheCow extends Plugin
         $this->setSettings(array_merge(
             $this->getSettings()->toArray(),
             require dirname(__DIR__) . '/config.php',
+            Craft::$app->getConfig()->getConfigFromFile('cache-cow'),
         ));
 
         $this->setComponents([

@@ -8,8 +8,11 @@ Or run the command
 /path/to/my/craft cache-cow/cache/warm
 ```
 
-If no sitemap.xml file exists in your web root, button will be disabled and you'll see an error.
+Cache Cow will look for your sitemap at {webroot}/sitemap.xml by default, but you can override in `config/cache-cow.php` with your own `sitemapUrl` value.
+If no sitemap exists at the specified location, button will be disabled and you'll see an error.
 ![Screen shot of Warm Cache button disabled with missing sitemap error.](sitemap-missing-error.png)
+
+
 
 ## Requirements
 
