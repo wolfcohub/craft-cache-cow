@@ -16,7 +16,7 @@ If no sitemap exists at the specified location, button will be disabled and you'
 
 ## Requirements
 
-This plugin requires Craft CMS 5.3.0 or later, and PHP 8.2 or later.
+This plugin requires Craft CMS 4.0.0 or later, and PHP 8.2 or later.
 
 ## Installation
 
