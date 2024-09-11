@@ -6,6 +6,7 @@ use Craft;
 use craft\base\Component;
 use craft\errors\SiteNotFoundException;
 use craft\helpers\UrlHelper;
+use craft\helpers\App;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -73,7 +74,7 @@ class CacheWarmerService extends Component
 
     public function getSitemapExists(): bool
     {
-        $sitemapPath = Craft::getAlias('@webroot/' . CacheCow::$plugin->getSettings()->sitemapUrl);
+        $sitemapPath = Craft::getAlias('@webroot/' . self::getSitemapUrl());
         return file_exists($sitemapPath);
     }
 
@@ -89,6 +90,16 @@ class CacheWarmerService extends Component
         return count($jobs);
     }
 
+    public static function getSitemapUrl(): string
+    {
+        $sitemapUrl = CacheCow::$plugin->getSettings()->sitemapUrl ?? "";
+        $sitemapUrlFromEnv = App::parseEnv($sitemapUrl);
+        if (!empty($sitemapUrlFromEnv)) {
+            return $sitemapUrlFromEnv;
+        }
+        return $sitemapUrl;
+    }
+
     /**
      * @return array
      * @throws Exception
@@ -97,7 +108,7 @@ class CacheWarmerService extends Component
     {
         $parser = new SitemapParser();
         try {
-            $sitemapPath = UrlHelper::baseSiteUrl() . CacheCow::$plugin->getSettings()->sitemapUrl;
+            $sitemapPath = UrlHelper::baseSiteUrl() . self::getSitemapUrl();
         } catch (SiteNotFoundException $e) {
             throw new Exception('Cache warming not possible as no site is configured');
         }
@@ -110,6 +121,8 @@ class CacheWarmerService extends Component
         foreach ($parser->getUrls() as $url => $tags) {
             $urls[$url] = $url;
         }
-        return $urls;
+        // include any additional URLs configured in settings
+        $additionalUrls = array_reduce(CacheCow::$plugin->getSettings()->additionalUrls, 'array_merge', []);
+        return array_merge($additionalUrls, $urls);
     }
 }

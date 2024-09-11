@@ -1,0 +1,28 @@
+{% import '_includes/forms' as forms %}
+<h3>{{ "Settings"|t }}</h3>
+
+{{ forms.autosuggestField({
+    label: "Sitemap URL",
+    id: 'sitemapUrl',
+    name: 'sitemapUrl',
+    suggestEnvVars: true,
+    value: settings.sitemapUrl,
+    instructions: 'Location of your sitemap relative to web root',
+}) }}
+
+{{ forms.editableTableField({
+    label: 'Additional URLs',
+    instructions: 'Additional URLs to include in cache warming',
+    id: 'additionalUrls',
+    name: 'additionalUrls',
+    cols: [
+        {
+            heading : 'URL',
+            type: 'url',
+        },
+    ],
+    rows: settings.additionalUrls,
+    addRowLabel: "Add URL",
+    allowAdd: true,
+    allowDelete: true
+}) }}

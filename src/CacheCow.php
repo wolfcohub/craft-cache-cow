@@ -26,8 +26,8 @@ use yii\log\FileTarget;
 class CacheCow extends Plugin
 {
     public string $schemaVersion = '1.0.0';
+    public bool $hasCpSettings = true;
     public bool $hasCpSection = false;
-    public bool $hasCpSettings = false;
     public static Plugin $plugin;
 
     public function init(): void
@@ -38,14 +38,6 @@ class CacheCow extends Plugin
 
         parent::init();
         self::$plugin = $this;
-
-        $pluginsService = Craft::$app->getPlugins();
-
-        $this->setSettings(array_merge(
-            $this->getSettings()->toArray(),
-            require dirname(__DIR__) . '/config.php',
-            Craft::$app->getConfig()->getConfigFromFile('cache-cow'),
-        ));
 
         $this->setComponents([
             'cacheCow' => CacheWarmerService::class,
@@ -85,5 +77,13 @@ class CacheCow extends Plugin
     protected function createSettingsModel(): ?Model
     {
         return Craft::createObject(Settings::class);
+    }
+
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->view->renderTemplate(
+            'cache-cow/_settings',
+            ['settings' => $this->getSettings()]
+        );
     }
 }
