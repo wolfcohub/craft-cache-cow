@@ -10,7 +10,7 @@ use yii\base\Event;
 
 class WarmCacheJob extends BaseJob
 {
-    private array $urls = [];
+    public array $urls = [];
     private array $fetchedUrls = [];
     private array $failedUrls = [];
     private int $totalUrlCount;

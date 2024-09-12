@@ -1,3 +1,4 @@
+{% set noUrlsConfigured = not sitemapExists and additionalUrlCount == 0 %}
 <hr>
 
 <h2>{{ 'Warm Sitemap Caches'|t('app') }}</h2>
@@ -5,24 +6,25 @@
 <form id="warm-cache-form" method="post" action="{{ url('actions/cache-cow/cache/warm') }}"
 >
     {{ csrfInput() }}
-    <button type="submit" class="btn submit{% if jobsInProgress > 0 or not sitemapExists %} disabled{% endif %}" >
+    <button type="submit" class="btn submit{% if jobsInProgress > 0 or noUrlsConfigured %} disabled{% endif %}" >
         Warm Cache
     </button>
 </form>
-{% if not sitemapExists %}
-    <div id="sitemap-missing-error">
-        Cache warming not possible - no sitemap file found!
+{% if noUrlsConfigured %}
+    <div id="no-urls-error">
+        Cache warming not possible - Sitemap file missing and no URLs added.
+        You can add these in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
     </div>
 {% endif %}
 {% if jobsInProgress > 0 %}
     <div id="warm-cache-status">
-        {{ "Cache warming in progress. " ~ jobsInProgress ~ " URLs remaining. Check Queue Manager for details." }}
+        Cache warming already in progress. Check <a href="{{ url('utilities/queue-manager') }}">Queue Manager</a> for details.
     </div>
 {% endif %}
 <p>Powered by <a href="https://github.com/wolfcohub/craft-cache-cow">Cache Cow</a></p>
 
 <style>
-    #sitemap-missing-error {
+    #no-urls-error {
         margin-top: 20px;
         padding: 10px;
         border-radius: 5px;

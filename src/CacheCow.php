@@ -59,9 +59,11 @@ class CacheCow extends Plugin
                 if ($event->template === '_components/utilities/ClearCaches.twig') {
                     // Custom template to append to the Utilities -> Caches UI
                     $sitemapExists = CacheWarmerService::instance()->getSitemapExists();
+                    $additionalUrlCount = count(CacheCow::$plugin->getSettings()->additionalUrls);
                     $event->output .= Craft::$app->view->renderTemplate('cache-cow/index', [
                         'jobsInProgress' => $jobsInProgress,
                         'sitemapExists' => $sitemapExists,
+                        'additionalUrlCount' => $additionalUrlCount,
                     ]);
                 }
             }

@@ -8,8 +8,9 @@ Or run the command
 /path/to/my/craft cache-cow/cache/warm
 ```
 
-Cache Cow will look for your sitemap at {webroot}/sitemap.xml by default, but you can override in `config/cache-cow.php` with your own `sitemapUrl` value.
-If no sitemap exists at the specified location, button will be disabled and you'll see an error.
+Cache Cow will look for your sitemap at `{webroot}/sitemap.xml` by default, but you can set the path to your own sitemap in plugin settings. Or you can have the plugin read this value from an environment variable, depending on your needs.
+You can enter additional URLs for cache warming in plugin settings.
+If no URLs are found (i.e. no sitemap exists at the configured path and no additional URLs have been entered), "Warm Cache" button will be disabled and you'll see an error.
 ![Screen shot of Warm Cache button disabled with missing sitemap error.](sitemap-missing-error.png)
 
 
