@@ -31,7 +31,7 @@
     "handle": "cache-cow",
     "name": "Cache Cow",
     "developer": "Wolfco",
-    "documentationUrl": "https://github.com/git@github.com:wolfcohub/craft-cache-cow.git",
+    "documentationUrl": "https://github.com/wolfcohub/craft-cache-cow",
     "class": "wolfco\\cachecow\\CacheCow"
   },
   "scripts": {
