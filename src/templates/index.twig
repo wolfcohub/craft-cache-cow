@@ -1,5 +1,4 @@
 {% set noUrlsConfigured = not sitemapExists and additionalUrlCount == 0 %}
-<hr>
 
 <h2>{{ 'Warm Sitemap Caches'|t('app') }}</h2>
 
@@ -10,21 +9,27 @@
         Warm Cache
     </button>
 </form>
+<p>Powered by <a href="https://github.com/wolfcohub/craft-cache-cow">Cache Cow</a></p>
 {% if noUrlsConfigured %}
-    <div id="no-urls-error">
-        Cache warming not possible - Sitemap file missing and no URLs added.
-        You can add these in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
+    <div id="config-error">
+        Missing sitemap file and no URLs added.<br>
+        Configure your sitemap path or enter URLs for cache warming in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
+    </div>
+{% elseif not sitemapExists %}
+    <div id="config-warning">
+        Sitemap file not found.
+        Configure your sitemap path in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
     </div>
 {% endif %}
+
 {% if jobsInProgress > 0 %}
-    <div id="warm-cache-status">
+    <div id="config-warning">
         Cache warming already in progress. Check <a href="{{ url('utilities/queue-manager') }}">Queue Manager</a> for details.
     </div>
 {% endif %}
-<p>Powered by <a href="https://github.com/wolfcohub/craft-cache-cow">Cache Cow</a></p>
 
 <style>
-    #no-urls-error {
+    #config-error {
         margin-top: 20px;
         padding: 10px;
         border-radius: 5px;
@@ -32,7 +37,7 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
-    #warm-cache-status {
+    #config-warning {
         margin-top: 20px;
         padding: 10px;
         border-radius: 5px;

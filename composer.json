@@ -18,8 +18,7 @@
     "caseyamcl/guzzle_retry_middleware": "^2.10.0"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-latest"
-    ,
+    "roave/security-advisories": "dev-latest",
     "craftcms/ecs": "dev-main"
   },
   "autoload": {

@@ -5,12 +5,13 @@ namespace wolfco\cachecow;
 use Craft;
 use craft\base\Model;
 use craft\base\Plugin;
-use wolfco\cachecow\models\Settings;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\events\TemplateEvent;
+use craft\services\Utilities;
 use craft\web\UrlManager;
-use craft\web\View;
+use wolfco\cachecow\models\Settings;
 use wolfco\cachecow\services\CacheWarmerService;
+use wolfco\cachecow\utilities\Utility;
 use yii\base\Event;
 use yii\log\FileTarget;
 
@@ -27,7 +28,6 @@ class CacheCow extends Plugin
 {
     public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
-    public bool $hasCpSection = false;
     public static Plugin $plugin;
 
     public function init(): void
@@ -43,6 +43,8 @@ class CacheCow extends Plugin
             'cacheCow' => CacheWarmerService::class,
         ]);
 
+        Craft::setAlias('@plugins/cache-cow', __DIR__);
+
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
@@ -50,24 +52,12 @@ class CacheCow extends Plugin
                 $event->rules['cache-cow/cache/warm'] = 'cache-cow/cache/warm';
             }
         );
-
-        Event::on(
-            View::class,
-            View::EVENT_AFTER_RENDER_TEMPLATE,
-            function (TemplateEvent $event) {
-                $jobsInProgress = CacheWarmerService::instance()->getCacheWarmJobsInProgress();
-                if ($event->template === '_components/utilities/ClearCaches.twig') {
-                    // Custom template to append to the Utilities -> Caches UI
-                    $sitemapExists = CacheWarmerService::instance()->getSitemapExists();
-                    $additionalUrlCount = count(CacheCow::$plugin->getSettings()->additionalUrls);
-                    $event->output .= Craft::$app->view->renderTemplate('cache-cow/index', [
-                        'jobsInProgress' => $jobsInProgress,
-                        'sitemapExists' => $sitemapExists,
-                        'additionalUrlCount' => $additionalUrlCount,
-                    ]);
-                }
+        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES,
+            function(RegisterComponentTypesEvent $event) {
+                $event->types[] = Utility::class;
             }
         );
+
         Craft::getLogger()->dispatcher->targets['cacheCow'] = new FileTarget([
             'logFile' => Craft::getAlias('@storage/logs/cache-cow-' . date('Y-m-d') . '.log'),
             'categories' => ['cache-cow'],
