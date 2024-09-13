@@ -1,6 +1,6 @@
 # Cache Cow
 
-This plugin adds a "Warm Cache" button to Utilities > Caches on your Craft CMS control panel. Click it to fetch all URLs in your sitemap.xml.
+This plugin adds a "Warm Cache" button under Utilities > Cache Cow on your Craft CMS control panel. Click it to fetch all URLs in your sitemap.xml.
 ![Screen shot of Warm Cache button.](warm-cache-button.png)
 
 Or run the command
