@@ -27,6 +27,7 @@ use yii\log\FileTarget;
  */
 class CacheCow extends Plugin
 {
+    public string $schemaVersion = '2.1.1';
     public bool $hasCpSettings = true;
     public static Plugin $plugin;
 
@@ -52,11 +53,16 @@ class CacheCow extends Plugin
                 $event->rules['cache-cow/cache/warm'] = 'cache-cow/cache/warm';
             }
         );
-        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES,
-            function(RegisterComponentTypesEvent $event) {
+        // EVENT_REGISTER_UTILITY_TYPES was renamed to EVENT_REGISTER_UTILITIES in Craft 5.0.0
+        if (defined('craft\services\Utilities::EVENT_REGISTER_UTILITIES')) {
+            Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function (RegisterComponentTypesEvent $event) {
                 $event->types[] = Utility::class;
-            }
-        );
+            });
+        } elseif (defined('craft\services\Utilities::EVENT_REGISTER_UTILITY_TYPES')) {
+            Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITY_TYPES, function (RegisterComponentTypesEvent $event) {
+                $event->types[] = Utility::class;
+            });
+        }
 
         Craft::getLogger()->dispatcher->targets['cacheCow'] = new FileTarget([
             'logFile' => Craft::getAlias('@storage/logs/cache-cow-' . date('Y-m-d') . '.log'),
@@ -88,6 +94,7 @@ class CacheCow extends Plugin
             [
                 'settings' => $this->getSettings(),
                 'sites' => $sites,
+                'version' => $this->schemaVersion,
             ]
         );
     }

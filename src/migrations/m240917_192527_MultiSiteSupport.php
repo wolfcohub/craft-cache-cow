@@ -4,6 +4,7 @@ namespace wolfco\cachecow\migrations;
 
 use Craft;
 use craft\db\Migration;
+use craft\services\ProjectConfig;
 
 /**
  * m240917_192527_MultiSiteSupport migration.
@@ -15,22 +16,14 @@ class m240917_192527_MultiSiteSupport extends Migration
      */
     public function safeUp(): bool
     {
-        $plugin = Craft::$app->plugins->getPlugin('cache-cow');
-        if (!$plugin) {
-            return false;
+        $projectConfig = Craft::$app->getProjectConfig();
+
+        // If `sitemapUrl` exists, migrate its value to the new `sitemaps` array.
+        $sitemapUrl = $projectConfig->get('plugins.cache-cow.settings.sitemapUrl');
+        if ($sitemapUrl) {
+            $projectConfig->set('plugins.cache-cow.settings.sitemaps.' . ProjectConfig::ASSOC_KEY . '.0', ['default', $sitemapUrl]);
+            $projectConfig->remove('plugins.cache-cow.settings.sitemapUrl');
         }
-
-        $settings = $plugin->getSettings();
-
-        if (isset($settings->sitemapUrl)) {
-            $sitemapUrl = $settings->sitemapUrl;
-            $newSettings = [
-                'sitemaps' => [$sitemapUrl] // Convert the single sitemapUrl into an array
-            ];
-
-            Craft::$app->plugins->savePluginSettings($plugin, $newSettings);
-        }
-
         return true;
     }
 
@@ -39,20 +32,13 @@ class m240917_192527_MultiSiteSupport extends Migration
      */
     public function safeDown(): bool
     {
-        $plugin = Craft::$app->plugins->getPlugin('cache-cow');
-        if (!$plugin) {
-            return false;
-        }
-        $settings = $plugin->getSettings();
-        if (isset($settings->sitemaps) && is_array($settings->sitemaps)) {
-            $sitemapUrl = $settings->sitemaps[0] ?? null;
+        $projectConfig = Craft::$app->getProjectConfig();
 
-            if ($sitemapUrl) {
-                $oldSettings = [
-                    'sitemapUrl' => $sitemapUrl
-                ];
-                Craft::$app->plugins->savePluginSettings($plugin, $oldSettings);
-            }
+        // If `sitemaps` associative array exists, set first value to the old `sitemapUrl`
+        $sitemapUrl = $projectConfig->get('plugins.cache-cow.settings.sitemaps.' . ProjectConfig::ASSOC_KEY . '.0.1');
+        if ($sitemapUrl) {
+            $projectConfig->set('plugins.cache-cow.settings.sitemapUrl', $sitemapUrl);
+            $projectConfig->remove('plugins.cache-cow.settings.sitemaps');
         }
         return true;
     }

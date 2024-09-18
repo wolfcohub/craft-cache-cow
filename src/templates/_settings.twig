@@ -1,5 +1,7 @@
 {% import '_includes/forms' as forms %}
 
+<p><strong>Plugin Version:</strong> {{ version }}</p>
+
 {% for site in sites %}
     <h2>{{ site.name }}</h2>
     {{ forms.autosuggestField({
