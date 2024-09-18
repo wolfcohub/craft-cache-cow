@@ -1,14 +1,15 @@
 {% import '_includes/forms' as forms %}
-<h3>{{ "Settings"|t }}</h3>
 
-{{ forms.autosuggestField({
-    label: "Sitemap URL",
-    id: 'sitemapUrl',
-    name: 'sitemapUrl',
-    suggestEnvVars: true,
-    value: settings.sitemapUrl,
-    instructions: 'Location of your sitemap relative to web root',
-}) }}
+{% for site in sites %}
+    <h2>{{ site.name }}</h2>
+    {{ forms.autosuggestField({
+        label: "Sitemap URL",
+        name: 'sitemaps['~site.handle~']',
+        suggestEnvVars: true,
+        value: settings.getSitemapByHandle(site.handle),
+        instructions: 'Location of the '~site.name~' sitemap relative to web root',
+    }) }}
+{% endfor %}
 
 {{ forms.editableTableField({
     label: 'Additional URLs',

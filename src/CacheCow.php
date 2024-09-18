@@ -9,6 +9,7 @@ use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Utilities;
 use craft\web\UrlManager;
+use craft\web\View;
 use wolfco\cachecow\models\Settings;
 use wolfco\cachecow\services\CacheWarmerService;
 use wolfco\cachecow\utilities\Utility;
@@ -26,7 +27,6 @@ use yii\log\FileTarget;
  */
 class CacheCow extends Plugin
 {
-    public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
     public static Plugin $plugin;
 
@@ -66,6 +66,15 @@ class CacheCow extends Plugin
         ]);
     }
 
+    public function getAllSiteHandles(): array
+    {
+        $sites = [];
+        foreach (\Craft::$app->sites->getAllSites() as $site) {
+            $sites[] = $site->handle;
+        }
+        return $sites;
+    }
+
     protected function createSettingsModel(): ?Model
     {
         return Craft::createObject(Settings::class);
@@ -73,9 +82,13 @@ class CacheCow extends Plugin
 
     protected function settingsHtml(): ?string
     {
+        $sites = Craft::$app->sites->getAllSites();
         return Craft::$app->view->renderTemplate(
             'cache-cow/_settings',
-            ['settings' => $this->getSettings()]
+            [
+                'settings' => $this->getSettings(),
+                'sites' => $sites,
+            ]
         );
     }
 }

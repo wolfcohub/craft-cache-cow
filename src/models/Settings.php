@@ -10,12 +10,26 @@ use craft\base\Model;
  */
 class Settings extends Model
 {
-    public $sitemapUrl = 'sitemap.xml';
+    public $sitemaps = [];
     public array $additionalUrls = [];
+
     public function rules(): array
     {
         return [
-            [['sitemapUrl'], 'string'],
+            ['sitemaps', 'each', 'rule' => ['string']],
         ];
+    }
+
+    /**
+     * Get the sitemap for site handle
+     * @param  string $handle
+     * @return string
+     */
+    public function getSitemapByHandle(string $handle): string
+    {
+        if (isset($this->sitemaps[$handle])) {
+            return $this->sitemaps[$handle];
+        }
+        return 'sitemap.xml';
     }
 }

@@ -19,7 +19,6 @@ class WarmCacheJob extends BaseJob
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->urls = CacheWarmerService::getSiteUrls();
         $this->totalUrlCount = count($this->urls);
         $this->description = "Warming {$this->totalUrlCount} URLs";
     }

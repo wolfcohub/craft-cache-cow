@@ -22,8 +22,8 @@ use yii\base\Exception;
 
 class CacheWarmerService extends Component
 {
-    const EVENT_URL_FETCH_SUCCESS = 'urlFetchSuccess';
-    const EVENT_URL_FETCH_FAILURE = 'urlFetchFailure';
+    public const EVENT_URL_FETCH_SUCCESS = 'urlFetchSuccess';
+    public const EVENT_URL_FETCH_FAILURE = 'urlFetchFailure';
 
     /**
      * @param array $urls
@@ -72,9 +72,13 @@ class CacheWarmerService extends Component
         }
     }
 
-    public function getSitemapExists(): bool
+    /**
+     * @param string $handle
+     * @return bool
+     */
+    public static function getSitemapExists(string $handle = 'default'): bool
     {
-        $sitemapPath = Craft::getAlias('@webroot/' . self::getSitemapUrl());
+        $sitemapPath = Craft::getAlias('@webroot/' . self::getSitemapUrl($handle));
         return file_exists($sitemapPath);
     }
 
@@ -90,25 +94,32 @@ class CacheWarmerService extends Component
         return count($jobs);
     }
 
-    public static function getSitemapUrl(): string
+    /**
+     * @param string $handle
+     * @return string
+     */
+    public static function getSitemapUrl(string $handle = 'default'): string
     {
-        $sitemapUrl = CacheCow::$plugin->getSettings()->sitemapUrl ?? "";
+        $sitemapUrl = CacheCow::$plugin->getSettings()->getSitemapByHandle($handle) ?? "";
+
         $sitemapUrlFromEnv = App::parseEnv($sitemapUrl);
         if (!empty($sitemapUrlFromEnv)) {
+            // Sitemap is configured as an env variable, return the value
             return $sitemapUrlFromEnv;
         }
         return $sitemapUrl;
     }
 
     /**
+     * @param string $handle
      * @return array
      * @throws Exception
      */
-    public static function getSiteUrls(): array
+    public static function getSiteUrls(string $handle = 'default'): array
     {
         $parser = new SitemapParser();
         try {
-            $sitemapPath = UrlHelper::baseSiteUrl() . self::getSitemapUrl();
+            $sitemapPath = UrlHelper::baseSiteUrl() . self::getSitemapUrl($handle);
         } catch (SiteNotFoundException $e) {
             throw new Exception('Cache warming not possible as no site is configured');
         }
@@ -119,10 +130,8 @@ class CacheWarmerService extends Component
         }
         $urls = [];
         foreach ($parser->getUrls() as $url => $tags) {
-            $urls[$url] = $url;
+            $urls[] = $url;
         }
-        // include any additional URLs configured in settings
-        $additionalUrls = array_reduce(CacheCow::$plugin->getSettings()->additionalUrls, 'array_merge', []);
-        return array_merge($additionalUrls, $urls);
+        return $urls;
     }
 }

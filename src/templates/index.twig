@@ -1,24 +1,27 @@
-{% set noUrlsConfigured = not sitemapExists and additionalUrlCount == 0 %}
+{% import '_includes/forms' as forms %}
 
 <h2>{{ 'Warm Sitemap Caches'|t('app') }}</h2>
 
-<form id="warm-cache-form" method="post" action="{{ url('actions/cache-cow/cache/warm') }}"
->
+<form id="warm-cache-form" method="post" action="{{ url('actions/cache-cow/cache/warm') }}">
     {{ csrfInput() }}
-    <button type="submit" class="btn submit{% if jobsInProgress > 0 or noUrlsConfigured %} disabled{% endif %}" >
+    {{ forms.checkboxSelectField({
+        id: 'handles',
+        name: 'handles',
+        options: cacheWarmingOptions,
+    }) }}
+    <button type="submit" class="btn submit{% if jobsInProgress > 0 or not canDoWarming %} disabled{% endif %}" >
         Warm Cache
     </button>
 </form>
 <p>Powered by <a href="https://github.com/wolfcohub/craft-cache-cow">Cache Cow</a></p>
-{% if noUrlsConfigured %}
+{% if not canDoWarming %}
     <div id="config-error">
         Missing sitemap file and no URLs added.<br>
         Configure your sitemap path or enter URLs for cache warming in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
     </div>
-{% elseif not sitemapExists %}
+{% elseif missingSitemaps %}
     <div id="config-warning">
-        Sitemap file not found.
-        Configure your sitemap path in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
+        Missing one or more sitemaps. Edit sitemap path(s) in <a href="{{ url('settings/plugins/cache-cow') }}">Settings</a>
     </div>
 {% endif %}
 
