@@ -1,7 +1,7 @@
 {
   "name": "wolfco/craft-cache-cow",
   "description": "Cache warming service for your Craft CMS application",
-  "version": "2.1.1",
+  "version": "2.1.0",
   "type": "craft-plugin",
   "homepage": "https://www.wolfco.us",
   "license": "proprietary",

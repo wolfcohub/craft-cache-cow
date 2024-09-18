@@ -1,18 +1,25 @@
 # Cache Cow
 
-This plugin adds a "Warm Cache" button under Utilities > Cache Cow on your Craft CMS control panel. Click it to fetch all URLs in your sitemap.xml.
-![Screen shot of Warm Cache button.](warm-cache-button.png)
+This plugin adds a "Warm Cache" button under Utilities > Cache Cow on your Craft CMS control panel. Click it to start the cache warming process on all selected sites.
+![Screen shot of Warm Cache button.](warm-caches-ui.png)
 
-Or run the command
+Cache Cow will look for your sitemap at `{webroot}/sitemap.xml` by default, but you can set the path to your own sitemap in plugin settings. Or you can have the plugin read this value from an environment variable, depending on your needs. Multiple sites are supported.
+You can enter additional URLs for cache warming in plugin settings (Settings > Plugins > Cache Cow > Settings).
+![Screen shot of Cache Cow plugin settings page.](plugin-settings.png)
+
+If no URLs are found for warming (i.e. no sitemap exists at the configured path and no additional URLs have been entered), "Warm Cache" button will be disabled and you'll see an error.
+![Screen shot of Warm Cache button disabled with "no URLs" error.](no-urls-error.png)
+
+You can also do cache warming via console command
 ```bash
 /path/to/my/craft cache-cow/cache/warm
 ```
-
-Cache Cow will look for your sitemap at `{webroot}/sitemap.xml` by default, but you can set the path to your own sitemap in plugin settings. Or you can have the plugin read this value from an environment variable, depending on your needs.
-You can enter additional URLs for cache warming in plugin settings.
-If no URLs are found (i.e. no sitemap exists at the configured path and no additional URLs have been entered), "Warm Cache" button will be disabled and you'll see an error.
-![Screen shot of Warm Cache button disabled with missing sitemap error.](sitemap-missing-error.png)
-
+By default it fetches all URLs from all configured sitemaps and any additional URLs added in Settings.
+You can target one or a few site handles by passing them in as a comma-separated list
+```bash
+/path/to/my/craft cache-cow/cache/warm myCraftSite,myOtherCraftSite
+```
+Use handle `custom` to target additional URLs added in Settings. 
 
 
 ## Requirements

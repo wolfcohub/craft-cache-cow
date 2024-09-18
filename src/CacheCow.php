@@ -9,7 +9,6 @@ use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Utilities;
 use craft\web\UrlManager;
-use craft\web\View;
 use wolfco\cachecow\models\Settings;
 use wolfco\cachecow\services\CacheWarmerService;
 use wolfco\cachecow\utilities\Utility;
@@ -27,7 +26,7 @@ use yii\log\FileTarget;
  */
 class CacheCow extends Plugin
 {
-    public string $schemaVersion = '2.1.1';
+    public string $schemaVersion = '2.1.0';
     public bool $hasCpSettings = true;
     public static Plugin $plugin;
 

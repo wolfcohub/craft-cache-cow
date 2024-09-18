@@ -1,5 +1,12 @@
 # Release Notes for Cache Cow
 
+## v2.1.0 - 2024-09-18
+
+### Added
+
+- Added support for multiple sites
+- Added version number to settings page
+
 ## v2.0.1 - 2024-09-13
 
 ### Changed
