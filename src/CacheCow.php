@@ -14,6 +14,7 @@ use wolfco\cachecow\models\Settings;
 use wolfco\cachecow\services\CacheWarmerService;
 use wolfco\cachecow\utilities\Utility;
 use yii\base\Event;
+use yii\log\Dispatcher;
 
 /**
  * Cache Cow plugin
