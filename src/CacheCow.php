@@ -7,13 +7,14 @@ use craft\base\Model;
 use craft\base\Plugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\log\MonologTarget;
 use craft\services\Utilities;
 use craft\web\UrlManager;
 use wolfco\cachecow\models\Settings;
 use wolfco\cachecow\services\CacheWarmerService;
 use wolfco\cachecow\utilities\Utility;
 use yii\base\Event;
-use yii\log\FileTarget;
+use yii\log\Dispatcher;
 
 /**
  * Cache Cow plugin
@@ -63,12 +64,19 @@ class CacheCow extends Plugin
             });
         }
 
-        Craft::getLogger()->dispatcher->targets['cacheCow'] = new FileTarget([
-            'logFile' => Craft::getAlias('@storage/logs/cache-cow-' . date('Y-m-d') . '.log'),
-            'categories' => ['cache-cow'],
-            'levels' => ['error', 'warning', 'info'],
-            'logVars' => [],
-        ]);
+        if (Craft::getLogger()->dispatcher instanceof Dispatcher) {
+            Craft::getLogger()->dispatcher->targets['cacheCow'] = new MonologTarget([
+                'name' => 'cacheCow',
+                'categories' => ['cache-cow'],
+                'level' => LogLevel::INFO,
+                'logContext' => false,
+                'allowLineBreaks' => false,
+                'formatter' => new LineFormatter(
+                    format: "[%datetime%] %message%\n",
+                    dateFormat: 'Y-m-d H:i:s',
+                ),
+            ]);
+        }
     }
 
     public function getAllSiteHandles(): array
